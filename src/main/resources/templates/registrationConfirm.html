@@ -8,15 +8,13 @@
     <link rel="stylesheet" type="text/css" th:href="@{/webjars/bootstrap/3.3.7/css/bootstrap.min.css}"/>
     <link rel="stylesheet" type="text/css" th:href="@{/css/main.css}"/>
 
-    <title th:text="#{title.login}">Registration</title>
+    <title>Registration</title>
 </head>
+
 <body>
-<div class="container">
-    <h1>Spring Security User Registration with Hibernate and Thymeleaf</h1>
+<div class="col-md-6 col-md-offset-3">
+    <!--<h1 class="alert alert-info" th:text="#{message.regSucc}">success</h1>-->
+    <a class="btn btn-primary" th:href="@{/login}" th:text="#{label.login}">login</a>
 </div>
-
-<script type="text/javascript" th:src="@{/webjars/jquery/3.2.1/jquery.min.js/}"></script>
-<script type="text/javascript" th:src="@{/webjars/bootstrap/3.3.7/js/bootstrap.min.js}"></script>
-
 </body>
 </html>
