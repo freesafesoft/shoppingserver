@@ -7,7 +7,6 @@ import com.fss.shopping.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.MessageSource;
 import org.springframework.core.env.Environment;
@@ -59,11 +58,4 @@ public class RegistrationListener implements ApplicationListener<OnRegistrationC
         email.setFrom(env.getProperty("support.email"));
         return email;
     }
-
-//    @Bean
-//    public MessageSource getMessages()
-//    {
-//        return new ResourceBundleMessageSource();
-//    }
-
 }

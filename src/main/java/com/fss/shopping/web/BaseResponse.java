@@ -1,36 +1,26 @@
 package com.fss.shopping.web;
 
-import org.springframework.validation.ObjectError;
+import java.io.Serializable;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-public class BaseResponse {
-    private String message;
+public class BaseResponse implements Serializable {
+    private String status;
     private String error;
 
-    public BaseResponse(final String message) {
-        this.message = message;
+    public BaseResponse(final String status) {
+        this.status = status;
     }
 
-    public BaseResponse(final String message, final String error) {
-        this.message = message;
+    public BaseResponse(final String status, final String error) {
+        this.status = status;
         this.error = error;
     }
 
-    public BaseResponse(List<ObjectError> allErrors, String error) {
-        this.error = error;
-        this.message = allErrors.stream()
-                .map(e -> e.getDefaultMessage())
-                .collect(Collectors.joining(","));
+    public String getStatus() {
+        return status;
     }
 
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(final String message) {
-        this.message = message;
+    public void setStatus(final String status) {
+        this.status = status;
     }
 
     public String getError() {

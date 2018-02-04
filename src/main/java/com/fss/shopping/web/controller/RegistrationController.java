@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -20,13 +21,11 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.Calendar;
-import java.util.Locale;
 
 @Controller
-public class UserRegistrationController {
-    private static final Logger LOGGER = LoggerFactory.getLogger(UserRegistrationController.class);
+public class RegistrationController {
+    private static final Logger LOGGER = LoggerFactory.getLogger(RegistrationController.class);
 
     @Autowired
     private UserService userService;
@@ -51,25 +50,44 @@ public class UserRegistrationController {
         return "registration";
     }
 
-    @RequestMapping(value = "/registration", method = RequestMethod.POST)
+    @RequestMapping(value = "/registration", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public BaseResponse registerUserAccount(@ModelAttribute("user") @Valid UserRegistrationDto userDto,
+    public BaseResponse registerUserJson(@ModelAttribute("user") @Valid UserRegistrationDto userDto,
                                             HttpServletRequest request) {
+        return registerUser(userDto, request);
+    }
+
+    @RequestMapping(value = "/registration", method = RequestMethod.POST, produces = MediaType.APPLICATION_XML_VALUE)
+    @ResponseBody
+    public BaseResponse registerUserXml(@ModelAttribute("user") @Valid UserRegistrationDto userDto,
+                                            HttpServletRequest request) {
+
+        return registerUser(userDto, request);
+    }
+
+    @RequestMapping(value = "/registration", method = RequestMethod.POST, produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    @ResponseBody
+    public BaseResponse registerUserStream(@ModelAttribute("user") @Valid UserRegistrationDto userDto,
+                                        HttpServletRequest request) {
+        return registerUser(userDto, request);
+    }
+
+    private BaseResponse registerUser(UserRegistrationDto userDto, HttpServletRequest request) {
         LOGGER.info("registration");
         User existing = userService.findByEmail(userDto.getEmail());
 
         if (existing != null) {
             return new BaseResponse("User already exists");
         }
-        String recaptcha = request.getParameter("g-recaptcha-response");
-        LOGGER.info("Recaptcha: " + recaptcha);
+        String captcha = request.getParameter("g-recaptcha-response");
+        LOGGER.info("Recaptcha: " + captcha);
         String ip = request.getRemoteAddr();
         try {
-            boolean verify = VerifyRecaptcha.verify(recaptcha, ip);
+            boolean verify = VerifyRecaptcha.verify(captcha, ip);
             if (verify == false)
-                return new BaseResponse("Bad recaptcha: " + recaptcha);
+                return new BaseResponse("Bad recaptcha: " + captcha);
         } catch (IOException e) {
-            return new BaseResponse("Bad recaptcha: " + recaptcha);
+            return new BaseResponse("Bad recaptcha: " + captcha);
         }
         User user = userService.save(userDto);
         eventPublisher.publishEvent(new OnRegistrationCompleteEvent(user, request.getLocale(), getAppUrl(request)));
