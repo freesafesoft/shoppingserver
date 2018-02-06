@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.Mapping;
 import javax.validation.constraints.AssertTrue;
 
 @FieldMatch.List({@FieldMatch(first = "password", second = "confirmPassword", message = "The password fields must match"),
+
+
         @FieldMatch(first = "email", second = "confirmEmail", message = "The email fields must match")})
 public class UserRegistrationDto {
 

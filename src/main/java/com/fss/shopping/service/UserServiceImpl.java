@@ -3,9 +3,11 @@ package com.fss.shopping.service;
 import com.fss.shopping.persistence.dao.RoleRepository;
 import com.fss.shopping.persistence.dao.UserRepository;
 import com.fss.shopping.persistence.dao.VerificationTokenRepository;
+import com.fss.shopping.persistence.entity.Privilege;
 import com.fss.shopping.persistence.entity.Role;
 import com.fss.shopping.persistence.entity.User;
 import com.fss.shopping.persistence.entity.VerificationToken;
+import com.fss.shopping.security.LoginAttemptService;
 import com.fss.shopping.web.dto.UserRegistrationDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
@@ -14,17 +16,23 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.stream.Collectors;
+import javax.servlet.http.HttpServletRequest;
+import java.util.*;
 
-@Service
+@Service("userDetailsService")
+@Transactional
 public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private LoginAttemptService loginAttemptService;
+
+    @Autowired
+    private HttpServletRequest request;
 
     @Autowired
     private RoleRepository roleRepository;
@@ -34,6 +42,63 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
+
+    public UserServiceImpl() {
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(final String email) throws UsernameNotFoundException {
+
+        final String ip = getClientIP();
+        if (loginAttemptService.isBlocked(ip)) {
+            throw new RuntimeException("blocked");
+        }
+
+        try {
+            final User user = userRepository.findByEmail(email);
+            if (user == null) {
+                throw new UsernameNotFoundException("No user found with username: " + email);
+            }
+
+            return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(), user.isEnabled(), true, true, true, getAuthorities(user.getRoles()));
+        } catch (final Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private final Collection<? extends GrantedAuthority> getAuthorities(final Collection<Role> roles) {
+        return getGrantedAuthorities(getPrivileges(roles));
+    }
+
+    private final List<String> getPrivileges(final Collection<Role> roles) {
+        final List<String> privileges = new ArrayList<String>();
+        final List<Privilege> collection = new ArrayList<Privilege>();
+        for (final Role role : roles) {
+            collection.addAll(role.getPrivileges());
+        }
+        for (final Privilege item : collection) {
+            privileges.add(item.getName());
+        }
+
+        return privileges;
+    }
+
+    private final List<GrantedAuthority> getGrantedAuthorities(final List<String> privileges) {
+        final List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
+        for (final String privilege : privileges) {
+            authorities.add(new SimpleGrantedAuthority(privilege));
+        }
+        return authorities;
+    }
+
+    private final String getClientIP() {
+        final String xfHeader = request.getHeader("X-Forwarded-For");
+        if (xfHeader == null) {
+            return request.getRemoteAddr();
+        }
+        return xfHeader.split(",")[0];
+    }
+
 
     public User findByEmail(String email) {
         return userRepository.findByEmail(email);
@@ -58,16 +123,6 @@ public class UserServiceImpl implements UserService {
         return userRepository.save(user);
     }
 
-    @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = userRepository.findByEmail(email);
-        if (user == null) {
-            throw new UsernameNotFoundException("Invalid username or password.");
-        }
-        return new org.springframework.security.core.userdetails.User(user.getEmail(),
-                user.getPassword(),
-                mapRolesToAuthorities(user.getRoles()));
-    }
 
     @Override
     public void createVerificationTokenForUser(final User user, final String token) {
@@ -98,11 +153,5 @@ public class UserServiceImpl implements UserService {
         // tokenRepository.delete(verificationToken);
         userRepository.save(user);
         return VerificationToken.TokenState.VALID;
-    }
-
-    private Collection<? extends GrantedAuthority> mapRolesToAuthorities(Collection<Role> roles) {
-        return roles.stream()
-                .map(role -> new SimpleGrantedAuthority(role.getName()))
-                .collect(Collectors.toList());
     }
 }

@@ -1,13 +1,8 @@
 package com.fss.shopping.config;
 
 import com.fss.shopping.security.ActiveUserStore;
-import com.fss.shopping.security.CustomAuthenticationProvider;
-import com.fss.shopping.security.CustomWebAuthenticationDetailsSource;
-import com.fss.shopping.service.UserService;
 import com.fss.shopping.validation.EmailValidator;
 import com.fss.shopping.validation.PasswordMatchesValidator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -29,13 +24,9 @@ import org.springframework.web.servlet.i18n.CookieLocaleResolver;
 
 import java.util.Locale;
 
-@ComponentScan(basePackages = { "com.fss.shopping.security" })
+@ComponentScan(basePackages = {"com.fss.shopping.security"})
 @Configuration
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
-    private static final Logger LOGGER = LoggerFactory.getLogger(SecurityConfig.class);
-    @Autowired
-    private UserService userService;
-
     @Autowired
     private UserDetailsService userDetailsService;
 
@@ -48,25 +39,23 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private LogoutSuccessHandler logoutHandler;
 
-    @Autowired
-    private CustomWebAuthenticationDetailsSource authenticationDetailsSource;
-
-
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
                 .antMatchers("/registration**").permitAll()
+                .antMatchers("/add").hasAuthority("WRITE_PRIVILEGE")
+                .antMatchers("/read").hasAuthority("READ_PRIVILEGE")
                 .anyRequest().authenticated()
-                .and()
 
+                .and()
                 .formLogin()
                 .loginPage("/login")
                 .successHandler(authHandler)
                 .failureHandler(authFailureHandler)
                 .permitAll()
-                .and()
 
+                .and()
                 .logout()
                 .invalidateHttpSession(true)
                 .clearAuthentication(true)
@@ -79,7 +68,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider auth = new CustomAuthenticationProvider();
+        DaoAuthenticationProvider auth = new DaoAuthenticationProvider();
         auth.setUserDetailsService(userDetailsService);
         auth.setPasswordEncoder(passwordEncoder());
         return auth;

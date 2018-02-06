@@ -1,10 +1,9 @@
 package com.fss.shopping.web;
 
-import java.io.Serializable;
-
-public class BaseResponse implements Serializable {
+public class BaseResponse {
     private String status;
     private String error;
+    private Object result;
 
     public BaseResponse(final String status) {
         this.status = status;
@@ -29,6 +28,14 @@ public class BaseResponse implements Serializable {
 
     public void setError(final String error) {
         this.error = error;
+    }
+
+    public Object getResult() {
+        return result;
+    }
+
+    public void setResult(final Object result) {
+        this.result = result;
     }
 
 }
