@@ -26,15 +26,6 @@ public class AuthHandler implements AuthenticationSuccessHandler {
     @Autowired
     ActiveUserStore activeUserStore;
 
-    public AuthHandler() {
-        super();
-        setRedirectStrategy(new RedirectStrategy() {
-            @Override
-            public void sendRedirect(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, String s) throws IOException {
-            }
-        });
-    }
-
     @Override
     public void onAuthenticationSuccess(final HttpServletRequest request, final HttpServletResponse response, final Authentication authentication) throws IOException {
         final HttpSession session = request.getSession(false);

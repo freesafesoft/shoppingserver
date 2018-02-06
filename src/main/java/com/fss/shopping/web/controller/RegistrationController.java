@@ -79,16 +79,18 @@ public class RegistrationController {
         if (existing != null) {
             return new BaseResponse("User already exists");
         }
-        String captcha = request.getParameter("g-recaptcha-response");
-        LOGGER.info("Recaptcha: " + captcha);
-        String ip = request.getRemoteAddr();
-        try {
-            boolean verify = VerifyRecaptcha.verify(captcha, ip);
-            if (verify == false)
-                return new BaseResponse("Bad recaptcha: " + captcha);
-        } catch (IOException e) {
-            return new BaseResponse("Bad recaptcha: " + captcha);
-        }
+
+//        String captcha = request.getParameter("g-recaptcha-response");
+//        LOGGER.info("Recaptcha: " + captcha);
+//        String ip = request.getRemoteAddr();
+//        try {
+//            boolean verify = VerifyRecaptcha.verify(captcha, ip);
+//            if (verify == false)
+//                return new BaseResponse("Bad recaptcha: " + captcha);
+//        } catch (IOException e) {
+//            return new BaseResponse("Bad recaptcha: " + captcha);
+//        }
+
         User user = userService.save(userDto);
         eventPublisher.publishEvent(new OnRegistrationCompleteEvent(user, request.getLocale(), getAppUrl(request)));
         LOGGER.info("Registration complete: " + user.toString());

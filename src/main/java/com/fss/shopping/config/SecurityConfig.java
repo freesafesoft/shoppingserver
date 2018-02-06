@@ -1,17 +1,23 @@
 package com.fss.shopping.config;
 
 import com.fss.shopping.security.ActiveUserStore;
+import com.fss.shopping.security.CustomAuthenticationProvider;
+import com.fss.shopping.security.CustomWebAuthenticationDetailsSource;
 import com.fss.shopping.service.UserService;
 import com.fss.shopping.validation.EmailValidator;
 import com.fss.shopping.validation.PasswordMatchesValidator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -23,11 +29,15 @@ import org.springframework.web.servlet.i18n.CookieLocaleResolver;
 
 import java.util.Locale;
 
+@ComponentScan(basePackages = { "com.fss.shopping.security" })
 @Configuration
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(SecurityConfig.class);
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private UserDetailsService userDetailsService;
 
     @Autowired
     private AuthenticationSuccessHandler authHandler;
@@ -38,12 +48,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private LogoutSuccessHandler logoutHandler;
 
+    @Autowired
+    private CustomWebAuthenticationDetailsSource authenticationDetailsSource;
+
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
-                .antMatchers("/registration**", "/js/**", "/css/**", "/img/**", "/webjars/**").permitAll()
+                .antMatchers("/registration**").permitAll()
                 .anyRequest().authenticated()
                 .and()
 
@@ -65,17 +78,18 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Bean
+    public DaoAuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider auth = new CustomAuthenticationProvider();
+        auth.setUserDetailsService(userDetailsService);
+        auth.setPasswordEncoder(passwordEncoder());
+        return auth;
+    }
+
+    @Bean
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    @Bean
-    public DaoAuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider auth = new DaoAuthenticationProvider();
-        auth.setUserDetailsService(userService);
-        auth.setPasswordEncoder(passwordEncoder());
-        return auth;
-    }
 
     @Bean
     public ActiveUserStore activeUserStore() {
@@ -83,7 +97,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+    protected void configure(AuthenticationManagerBuilder auth) {
         auth.authenticationProvider(authenticationProvider());
     }
 

@@ -1,5 +1,8 @@
 package com.fss.shopping.security;
 
+import com.fss.shopping.web.controller.RegistrationController;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.security.core.AuthenticationException;
@@ -16,6 +19,7 @@ import java.util.Locale;
 
 @Component("authFailureHandler")
 public class AuthFailureHandler extends SimpleUrlAuthenticationFailureHandler {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AuthFailureHandler.class);
 
     @Autowired
     private MessageSource messageSource;
@@ -28,10 +32,11 @@ public class AuthFailureHandler extends SimpleUrlAuthenticationFailureHandler {
         super.onAuthenticationFailure(request, response, exception);
         final Locale locale = localeResolver.resolveLocale(request);
         String errorCode = exception.getMessage();
-        String errorMessage = messageSource.getMessage(errorCode, null, locale);
-        if (errorMessage != null)
-            request.getSession().setAttribute(WebAttributes.AUTHENTICATION_EXCEPTION, errorMessage);
-        else
+        LOGGER.error("login error", exception);
+       // String errorMessage = messageSource.getMessage(errorCode, null, locale);
+        //if (errorMessage != null)
+        //    request.getSession().setAttribute(WebAttributes.AUTHENTICATION_EXCEPTION, errorMessage);
+       // else
             request.getSession().setAttribute(WebAttributes.AUTHENTICATION_EXCEPTION, errorCode);
     }
 }
