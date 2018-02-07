@@ -1,5 +1,6 @@
 package com.fss.shopping.web.controller;
 
+import com.fss.shopping.persistence.entity.Product;
 import com.fss.shopping.web.BaseResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,20 +18,35 @@ public class AuthTestController {
     @ResponseBody
     public BaseResponse get() {
         LOGGER.info("getProduct");
-        return new BaseResponse("OK");
+        Product product = new Product();
+        product.setCategory("Milk");
+        product.setId(9999);
+        product.setName("Milk");
+        product.setUnits("l");
+        return new BaseResponse(product);
     }
 
     @RequestMapping(value = "/add", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public BaseResponse add() {
         LOGGER.info("addProduct");
-        return new BaseResponse("OK");
+        Product product = new Product();
+        product.setCategory("Milk");
+        product.setId(9999);
+        product.setName("Milk");
+        product.setUnits("l");
+        return new BaseResponse(product);
     }
 
     @RequestMapping(value = "/check", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public BaseResponse check() {
         LOGGER.info("check");
-        return new BaseResponse("OK");
+        Product product = new Product();
+        product.setCategory("Milk");
+        product.setId(9999);
+        product.setName("Milk");
+        product.setUnits("l");
+        return new BaseResponse(product);
     }
 }

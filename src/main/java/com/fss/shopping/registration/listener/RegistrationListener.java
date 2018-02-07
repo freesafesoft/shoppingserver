@@ -19,18 +19,18 @@ import java.util.UUID;
 @Component
 public class RegistrationListener implements ApplicationListener<OnRegistrationCompleteEvent> {
     private static final Logger LOGGER = LoggerFactory.getLogger(RegistrationListener.class);
+    private final UserService service;
+    private final MessageSource messageSource;
+    private final JavaMailSender mailSender;
+    private final Environment env;
 
     @Autowired
-    private UserService service;
-
-    @Autowired
-    private MessageSource messageSource;
-
-    @Autowired
-    private JavaMailSender mailSender;
-
-    @Autowired
-    private Environment env;
+    public RegistrationListener(UserService service, MessageSource messageSource, JavaMailSender mailSender, Environment env) {
+        this.service = service;
+        this.messageSource = messageSource;
+        this.mailSender = mailSender;
+        this.env = env;
+    }
 
     @Override
     public void onApplicationEvent(final OnRegistrationCompleteEvent event) {
@@ -46,7 +46,7 @@ public class RegistrationListener implements ApplicationListener<OnRegistrationC
         mailSender.send(email);
     }
 
-    private final SimpleMailMessage constructEmailMessage(final OnRegistrationCompleteEvent event, final User user, final String token) {
+    private SimpleMailMessage constructEmailMessage(final OnRegistrationCompleteEvent event, final User user, final String token) {
         final String recipientAddress = user.getEmail();
         final String subject = "Registration Confirmation";
         final String confirmationUrl = event.getAppUrl() + "/registrationConfirm.html?token=" + token;

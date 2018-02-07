@@ -1,24 +1,30 @@
 package com.fss.shopping.web;
 
 public class BaseResponse {
-    private String status;
+    private int status = OK_RESULT;
+    private String message;
     private String error;
     private Object result;
 
-    public BaseResponse(final String status) {
-        this.status = status;
+    public static final int OK_RESULT = 200;
+
+    public BaseResponse() {
     }
 
-    public BaseResponse(final String status, final String error) {
+    public BaseResponse(Object result) {
+        this.result = result;
+    }
+
+    public BaseResponse(int status, String error) {
         this.status = status;
         this.error = error;
     }
 
-    public String getStatus() {
+    public int getStatus() {
         return status;
     }
 
-    public void setStatus(final String status) {
+    public void setStatus(int status) {
         this.status = status;
     }
 
@@ -26,7 +32,7 @@ public class BaseResponse {
         return error;
     }
 
-    public void setError(final String error) {
+    public void setError(String error) {
         this.error = error;
     }
 
@@ -34,8 +40,7 @@ public class BaseResponse {
         return result;
     }
 
-    public void setResult(final Object result) {
+    public void setResult(Object result) {
         this.result = result;
     }
-
 }

@@ -6,8 +6,8 @@ import com.fss.shopping.persistence.entity.User;
 import com.fss.shopping.persistence.entity.VerificationToken;
 import com.fss.shopping.registration.OnRegistrationCompleteEvent;
 import com.fss.shopping.service.UserService;
+import com.fss.shopping.utils.CaptchaVerification;
 import com.fss.shopping.web.BaseResponse;
-import com.fss.shopping.web.ErrorResponse;
 import com.fss.shopping.web.dto.UserRegistrationDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +30,8 @@ public class RegistrationController {
     private final ApplicationEventPublisher eventPublisher;
 
     @Autowired
-    public RegistrationController(ApplicationEventPublisher eventPublisher, UserService userService, UserRepository userRepository, VerificationTokenRepository tokenRepository) {
+    public RegistrationController(ApplicationEventPublisher eventPublisher, UserService userService, UserRepository userRepository,
+                                  VerificationTokenRepository tokenRepository) {
         this.eventPublisher = eventPublisher;
         this.userService = userService;
         this.userRepository = userRepository;
@@ -47,16 +48,23 @@ public class RegistrationController {
     public BaseResponse registerUserJson(@ModelAttribute("user") @Valid UserRegistrationDto userDto,
                                          HttpServletRequest request) {
         LOGGER.info("registration");
-        User existing = userService.findByEmail(userDto.getEmail());
+        User existing = userService.findUserByEmail(userDto.getEmail());
 
         if (existing != null) {
-            return new ErrorResponse("User already exists");
+            return new BaseResponse(199, "User already exists");
         }
+
+        String captcha = request.getParameter("g-recaptcha-response");
+        LOGGER.info("Recaptcha: " + captcha);
+        String ip = request.getRemoteAddr();
+        boolean verify = CaptchaVerification.verify(captcha, ip);
+        if (!verify)
+            return new BaseResponse("Bad recaptcha: " + captcha);
 
         User user = userService.save(userDto);
         eventPublisher.publishEvent(new OnRegistrationCompleteEvent(user, request.getLocale(), getAppUrl(request)));
         LOGGER.info("Registration complete: " + user.toString());
-        return new BaseResponse("OK");
+        return new BaseResponse();
     }
 
     @RequestMapping(value = "/registrationConfirm", method = RequestMethod.GET)
@@ -65,21 +73,21 @@ public class RegistrationController {
         final VerificationToken verificationToken = tokenRepository.findByToken(token);
         if (verificationToken == null) {
             LOGGER.info("There is no such token in DB: " + token);
-            return new ErrorResponse("Verification token is not valid or doesn't exists");
+            return new BaseResponse(199, "Verification token is not valid or doesn't exists");
         }
 
         final Calendar cal = Calendar.getInstance();
         if ((verificationToken.getExpiryDate().getTime() - cal.getTime().getTime()) <= 0) {
             tokenRepository.delete(verificationToken);
             LOGGER.info("Token expired: " + token);
-            return new ErrorResponse("Verification token expired");
+            return new BaseResponse(199, "Verification token expired");
         }
         final User user = verificationToken.getUser();
         user.setEnabled(true);
         userRepository.save(user);
         // TODO publish confirmed event
         LOGGER.info("Registration confirmed: " + user.toString());
-        return new BaseResponse("OK");
+        return new BaseResponse();
     }
 
     private String getAppUrl(HttpServletRequest request) {
