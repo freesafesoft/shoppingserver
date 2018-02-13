@@ -44,8 +44,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http
                 .authorizeRequests()
                 .antMatchers("/registration**").permitAll()
-                .antMatchers("/add").hasAuthority("WRITE_PRIVILEGE")
-                .antMatchers("/read").hasAuthority("READ_PRIVILEGE")
+                .antMatchers("/user/write").hasAuthority("WRITE_PRIVILEGE")
+                .antMatchers("/user/read").hasAuthority("READ_PRIVILEGE")
                 .anyRequest().authenticated()
 
                 .and()
@@ -96,7 +96,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         cookieLocaleResolver.setDefaultLocale(Locale.ENGLISH);
         return cookieLocaleResolver;
     }
-
 
     @Bean
     public EmailValidator usernameValidator() {

@@ -1,7 +1,9 @@
 package com.fss.shopping.web.controller;
 
+import com.fss.shopping.persistence.dao.RoleRepository;
 import com.fss.shopping.persistence.dao.UserRepository;
 import com.fss.shopping.persistence.dao.VerificationTokenRepository;
+import com.fss.shopping.persistence.entity.Role;
 import com.fss.shopping.persistence.entity.User;
 import com.fss.shopping.persistence.entity.VerificationToken;
 import com.fss.shopping.registration.OnRegistrationCompleteEvent;
@@ -19,23 +21,25 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.util.Calendar;
+import java.util.*;
 
 @Controller
 public class RegistrationController {
     private static final Logger LOGGER = LoggerFactory.getLogger(RegistrationController.class);
     private final UserService userService;
+    private final RoleRepository roleRepository;
     private final UserRepository userRepository;
     private final VerificationTokenRepository tokenRepository;
     private final ApplicationEventPublisher eventPublisher;
 
     @Autowired
     public RegistrationController(ApplicationEventPublisher eventPublisher, UserService userService, UserRepository userRepository,
-                                  VerificationTokenRepository tokenRepository) {
+                                  VerificationTokenRepository tokenRepository, RoleRepository roleRepository) {
         this.eventPublisher = eventPublisher;
         this.userService = userService;
         this.userRepository = userRepository;
         this.tokenRepository = tokenRepository;
+        this.roleRepository = roleRepository;
     }
 
     @ModelAttribute("user")
@@ -83,7 +87,15 @@ public class RegistrationController {
             return new BaseResponse(199, "Verification token expired");
         }
         final User user = verificationToken.getUser();
+        Role userRole = roleRepository.findByName("ROLE_USER");
+        LOGGER.info("User: " + user.toString());
+        LOGGER.info("New role: " + userRole.toString());
+        LOGGER.info("Repository: " + roleRepository.toString());
+        List<Role> roles = new ArrayList<>();
+        roles.add(roleRepository.findByName("ROLE_USER"));
+        user.setRoles(roles);
         user.setEnabled(true);
+
         userRepository.save(user);
         // TODO publish confirmed event
         LOGGER.info("Registration confirmed: " + user.toString());

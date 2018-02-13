@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 @Component
@@ -33,14 +34,16 @@ public class SetupDataLoader implements ApplicationListener<ContextRefreshedEven
             return;
         }
 
-        final Privilege readPrivilege = createPrivilegeIfNotFound("READ_PRIVILEGE");
         final Privilege writePrivilege = createPrivilegeIfNotFound("WRITE_PRIVILEGE");
+        final Privilege readPrivilege = createPrivilegeIfNotFound("READ_PRIVILEGE");
+        final Privilege guestPrivilege = createPrivilegeIfNotFound("GUEST_PRIVILEGE");
 
-        final List<Privilege> adminPrivileges = Arrays.asList(readPrivilege, writePrivilege);
-        final List<Privilege> userPrivileges = Arrays.asList(readPrivilege);
+        final List<Privilege> adminPrivileges = Arrays.asList(writePrivilege, readPrivilege, guestPrivilege);
+        final List<Privilege> userPrivileges = Arrays.asList(readPrivilege, guestPrivilege);
+        final List<Privilege> guestPrivileges = Arrays.asList(guestPrivilege);
         createRoleIfNotFound("ROLE_ADMIN", adminPrivileges);
         createRoleIfNotFound("ROLE_USER", userPrivileges);
-
+        createRoleIfNotFound("ROLE_GUEST", guestPrivileges);
         alreadySetup = true;
     }
 

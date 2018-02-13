@@ -83,14 +83,14 @@
                        th:text="${error}">Validation error</p>
                 </div>
                 <div class="form-group"
-                     th:classappend="${#fields.hasErrors('confirmPassword')}? 'has-error':''">
-                    <label for="confirmPassword" class="control-label">Confirm password</label>
-                    <input id="confirmPassword"
+                     th:classappend="${#fields.hasErrors('passwordConfirm')}? 'has-error':''">
+                    <label for="passwordConfirm" class="control-label">Confirm password</label>
+                    <input id="passwordConfirm"
                            class="form-control"
                            type="password"
-                           th:field="*{confirmPassword}"/>
+                           th:field="*{passwordConfirm}"/>
                     <p class="error-status"
-                       th:each="error : ${#fields.errors('confirmPassword')}"
+                       th:each="error : ${#fields.errors('passwordConfirm')}"
                        th:text="${error}">Validation error</p>
                 </div>
                 <div class="form-group"

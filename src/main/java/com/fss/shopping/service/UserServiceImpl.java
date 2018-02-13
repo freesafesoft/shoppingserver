@@ -57,7 +57,8 @@ public class UserServiceImpl implements UserService {
         user.setLastName(registration.getLastName());
         user.setEmail(registration.getEmail());
         user.setPassword(passwordEncoder.encode(registration.getPassword()));
-        user.setRoles(Collections.singletonList(roleRepository.findByName("ROLE_USER")));
+        user.setEnabled(false);
+        user.setRoles(Collections.singletonList(roleRepository.findByName("ROLE_GUEST")));
         return userRepository.save(user);
     }
 
@@ -79,7 +80,7 @@ public class UserServiceImpl implements UserService {
             if (user == null) {
                 throw new UsernameNotFoundException("No user found with username: " + email);
             }
-            return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(), user.isEnabled(),
+            return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(), true,
                     true, true, true, getAuthorities(user.getRoles()));
         } catch (final Exception e) {
             throw new RuntimeException(e);

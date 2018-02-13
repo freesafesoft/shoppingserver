@@ -4,13 +4,10 @@ import com.fss.shopping.constraint.FieldMatch;
 import com.fss.shopping.validation.ValidEmail;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotEmpty;
-import org.springframework.web.bind.annotation.Mapping;
 
 import javax.validation.constraints.AssertTrue;
 
-@FieldMatch.List({@FieldMatch(first = "password", second = "confirmPassword", message = "The password fields must match"),
-
-
+@FieldMatch.List({@FieldMatch(first = "password", second = "passwordConfirm", message = "The password fields must match"),
         @FieldMatch(first = "email", second = "confirmEmail", message = "The email fields must match")})
 public class UserRegistrationDto {
 
@@ -20,19 +17,15 @@ public class UserRegistrationDto {
     @NotEmpty
     private String lastName;
 
-    @NotEmpty
-    private String password;
-
-    @NotEmpty
-    private String confirmPassword;
-
     @ValidEmail
     @NotEmpty
     private String email;
 
-    @Email
     @NotEmpty
-    private String confirmEmail;
+    private String password;
+
+    @NotEmpty
+    private String passwordConfirm;
 
     @AssertTrue
     private Boolean terms;
@@ -61,12 +54,12 @@ public class UserRegistrationDto {
         this.password = password;
     }
 
-    public String getConfirmPassword() {
-        return confirmPassword;
+    public String getPasswordConfirm() {
+        return passwordConfirm;
     }
 
-    public void setConfirmPassword(String confirmPassword) {
-        this.confirmPassword = confirmPassword;
+    public void setPasswordConfirm(String passwordConfirm) {
+        this.passwordConfirm = passwordConfirm;
     }
 
     public String getEmail() {
@@ -75,14 +68,6 @@ public class UserRegistrationDto {
 
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    public String getConfirmEmail() {
-        return confirmEmail;
-    }
-
-    public void setConfirmEmail(String confirmEmail) {
-        this.confirmEmail = confirmEmail;
     }
 
     public Boolean getTerms() {

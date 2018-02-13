@@ -2,7 +2,7 @@ package com.fss.shopping.web;
 
 public class BaseResponse {
     private int status = OK_RESULT;
-    private String message;
+    private String message = "OK";
     private String error;
     private Object result;
 
