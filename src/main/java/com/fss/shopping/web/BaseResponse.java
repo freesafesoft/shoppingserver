@@ -1,44 +1,46 @@
 package com.fss.shopping.web;
 
-import org.springframework.validation.ObjectError;
-
-import java.util.List;
-import java.util.stream.Collectors;
-
 public class BaseResponse {
-    private String message;
+    private int status = OK_RESULT;
+    private String message = "OK";
     private String error;
+    private Object result;
 
-    public BaseResponse(final String message) {
-        this.message = message;
+    public static final int OK_RESULT = 200;
+
+    public BaseResponse() {
     }
 
-    public BaseResponse(final String message, final String error) {
-        this.message = message;
+    public BaseResponse(Object result) {
+        this.result = result;
+    }
+
+    public BaseResponse(int status, String error) {
+        this.status = status;
         this.error = error;
     }
 
-    public BaseResponse(List<ObjectError> allErrors, String error) {
-        this.error = error;
-        this.message = allErrors.stream()
-                .map(e -> e.getDefaultMessage())
-                .collect(Collectors.joining(","));
+    public int getStatus() {
+        return status;
     }
 
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(final String message) {
-        this.message = message;
+    public void setStatus(int status) {
+        this.status = status;
     }
 
     public String getError() {
         return error;
     }
 
-    public void setError(final String error) {
+    public void setError(String error) {
         this.error = error;
     }
 
+    public Object getResult() {
+        return result;
+    }
+
+    public void setResult(Object result) {
+        this.result = result;
+    }
 }
